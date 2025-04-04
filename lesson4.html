@@ -356,18 +356,30 @@
       document.getElementById("highscore").textContent = highscore;
     };
    <script>
-  // ... 你整個 JavaScript 程式碼 ...
-</script>
 
-<!-- 放這裡是正確的 ✅ -->
+<!-- 放在 quizArea、endScreen 後 -->
 <div style="margin-top: 30px;">
   <a href="index.html">
     <button>🔙 回首頁</button>
   </a>
 </div>
 
+<script>
+  // 當語音清單載入完成後執行（避免部分瀏覽器讀不到聲音）
+  window.speechSynthesis.onvoiceschanged = () => {
+    speechSynthesis.getVoices(); // 呼叫一次以初始化
+  };
+
+  // 頁面載入時顯示最高分
+  window.onload = () => {
+    document.getElementById("highscore").textContent = highscore;
+  };
+</script>
+
 </body>
 </html>
+
+
 
 
 
