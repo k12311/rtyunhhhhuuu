@@ -165,7 +165,7 @@
         { jp: "卵", zh: "蛋" }
       ]
     };
-      let lockedWords = [], currentWord = {}, score = 0, correctCount = 0, totalCount = 0;
+    let lockedWords = [], currentWord = {}, score = 0, correctCount = 0, totalCount = 0;
     let highscore = localStorage.getItem("highscore") || 0;
     let mode = "jpToZh";
     let quizType = "choice";
@@ -355,29 +355,42 @@
     window.onload = () => {
       document.getElementById("highscore").textContent = highscore;
     };
-   <script>
+    <script>
+      // 回首頁的函數
+      function goHome() {
+        document.getElementById("endScreen").style.display = "none";
+        document.getElementById("quizArea").style.display = "block";
+        document.getElementById("wordSelection").style.display = "block";
+        document.getElementById("question").textContent = "← 點上方按鈕開始練習";
+        document.getElementById("options").innerHTML = "";
+        document.getElementById("result").textContent = "";
+        score = 0;
+        document.getElementById("score").textContent = score;
+      }
 
-<!-- 放在 quizArea、endScreen 後 -->
-<div style="margin-top: 30px;">
-  <a href="index.html">
-    <button>🔙 回首頁</button>
-  </a>
-</div>
+      // 當語音清單載入完成後執行（避免部分瀏覽器讀不到聲音）
+      window.speechSynthesis.onvoiceschanged = () => {
+        speechSynthesis.getVoices(); // 呼叫一次以初始化
+      };
 
-<script>
-  // 當語音清單載入完成後執行（避免部分瀏覽器讀不到聲音）
-  window.speechSynthesis.onvoiceschanged = () => {
-    speechSynthesis.getVoices(); // 呼叫一次以初始化
-  };
+      // 頁面載入時顯示最高分與初始化語音
+      window.onload = () => {
+        document.getElementById("highscore").textContent = highscore;
+        speechSynthesis.getVoices(); // 初始化語音（有些瀏覽器需要）
+      };
+    </script>
 
-  // 頁面載入時顯示最高分
-  window.onload = () => {
-    document.getElementById("highscore").textContent = highscore;
-  };
-</script>
+    <!-- 放在 quizArea、endScreen 後 -->
+    <div style="margin-top: 30px;">
+      <a href="index.html">
+        <button>🔙 回首頁</button>
+      </a>
+    </div>
 
 </body>
 </html>
+
+
 
 
 
