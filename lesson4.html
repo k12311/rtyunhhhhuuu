@@ -22,6 +22,15 @@
     .lesson h3 {
       margin-top: 0;
     }
+    .option-button {
+      background-color: #fff;
+      margin: 5px;
+      padding: 10px 20px;
+      border: 2px solid #ff99cc;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+    }
     button {
       padding: 10px 16px;
       margin: 10px;
@@ -101,6 +110,12 @@
     <button onclick="goHome()">🔙 回首頁</button>
   </div>
 
+  <script src="lesson4to6-data.js"></script>
+  <script src="lesson4to6-logic.js"></script>
+</body>
+</html>
+
+
   <script>
     const allLessons = {
       "第4課": [
@@ -137,27 +152,20 @@
         { jp: "どういたしまして", zh: "不客氣" }
       ],
       "第6課": [
-        { jp: "食べます", zh: "吃" }, { jp: "飲みます", zh: "喝" }, { jp: "吸います", zh: "吸（香菸等）" },
-        { jp: "見ます", zh: "看" }, { jp: "聞きます", zh: "聽" }, { jp: "読みます", zh: "閱讀" },
-        { jp: "書きます", zh: "書寫" }, { jp: "買います", zh: "購買" }, { jp: "撮ります", zh: "拍攝（照片）" },
-        { jp: "します", zh: "做" }, { jp: "会います", zh: "見面（與朋友）" }, { jp: "ごはん", zh: "白飯、飯" },
-        { jp: "朝ごはん", zh: "早餐" }, { jp: "昼ごはん", zh: "午餐" }, { jp: "晩ごはん", zh: "晚餐" },
-        { jp: "パン", zh: "麵包" }, { jp: "卵", zh: "蛋" }, { jp: "肉", zh: "肉" },
-        { jp: "魚", zh: "魚" }, { jp: "野菜", zh: "蔬菜" }, { jp: "果物", zh: "水果" },
-        { jp: "水", zh: "水" }, { jp: "お茶", zh: "茶" }, { jp: "紅茶", zh: "紅茶" },
-        { jp: "牛乳", zh: "牛奶" }, { jp: "ジュース", zh: "果汁" }, { jp: "ビール", zh: "啤酒" },
-        { jp: "お酒", zh: "酒類、日本酒" }, { jp: "たばこ", zh: "香菸" }, { jp: "手紙", zh: "信" },
-        { jp: "レポート", zh: "報告" }, { jp: "写真", zh: "照片" }, { jp: "ビデオ", zh: "影片、錄影帶" },
-        { jp: "店", zh: "商店" }, { jp: "庭", zh: "庭院、院子" }, { jp: "宿題", zh: "作業" },
-        { jp: "テニス", zh: "網球" }, { jp: "サッカー", zh: "足球" }, { jp: "花見", zh: "賞花" },
-        { jp: "何", zh: "什麼" }, { jp: "いっしょに", zh: "一起" }, { jp: "ちょっと", zh: "一會兒、一點點" },
-        { jp: "いつも", zh: "總是" }, { jp: "ときどき", zh: "有時" }, { jp: "それから", zh: "然後" },
-        { jp: "ええ", zh: "是的" }, { jp: "いいですね。", zh: "好啊" },
-        { jp: "わかりました。", zh: "我明白了" }, { jp: "何ですか。", zh: "什麼事？" }, { jp: "じゃ、また[あした]。", zh: "那麼，明天再見。" }
+        { jp: "買います", zh: "買" }, { jp: "売ります", zh: "賣" }, { jp: "取ります", zh: "拿" },
+        { jp: "書きます", zh: "寫" }, { jp: "読みます", zh: "讀" }, { jp: "聞きます", zh: "聽" },
+        { jp: "見ます", zh: "看" }, { jp: "電話します", zh: "打電話" }, { jp: "歩きます", zh: "走路" },
+        { jp: "遊びます", zh: "玩" }, { jp: "泳ぎます", zh: "游泳" }, { jp: "寝ます", zh: "睡覺" },
+        { jp: "起きます", zh: "起床" }, { jp: "食べます", zh: "吃" }, { jp: "飲みます", zh: "喝" },
+        { jp: "昼食", zh: "午餐" }, { jp: "晩御飯", zh: "晚餐" }, { jp: "朝食", zh: "早餐" },
+        { jp: "ホテル", zh: "飯店" }, { jp: "レストラン", zh: "餐廳" }, { jp: "コーヒー", zh: "咖啡" },
+        { jp: "紅茶", zh: "紅茶" }, { jp: "ジュース", zh: "果汁" }, { jp: "ビール", zh: "啤酒" },
+        { jp: "パン", zh: "麵包" }, { jp: "ご飯", zh: "飯" }, { jp: "野菜", zh: "蔬菜" },
+        { jp: "果物", zh: "水果" }, { jp: "肉", zh: "肉" }, { jp: "魚", zh: "魚" },
+        { jp: "卵", zh: "蛋" }
       ]
     };
-
-    let lockedWords = [], currentWord = {}, score = 0, correctCount = 0, totalCount = 0;
+      let lockedWords = [], currentWord = {}, score = 0, correctCount = 0, totalCount = 0;
     let highscore = localStorage.getItem("highscore") || 0;
     let mode = "jpToZh";
     let quizType = "choice";
@@ -233,14 +241,20 @@
       const questionText = mode === "jpToZh"
         ? `「${currentWord.jp}」是什麼意思？`
         : `「${currentWord.zh}」的日文是什麼？`;
-
       document.getElementById("question").textContent = questionText;
-      document.getElementById("options").innerHTML = "";
+      document.getElementById("result").textContent = "";
+
+      const correctAnswer = mode === "jpToZh" ? currentWord.zh : currentWord.jp;
+      let optionsPool = fullLessonWords
+        .map(w => mode === "jpToZh" ? w.zh : w.jp)
+        .filter(opt => opt !== correctAnswer);
+      const options = shuffle([correctAnswer, ...shuffle(optionsPool).slice(0, 3)]);
+
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
 
       if (quizType === "choice") {
-        const options = shuffle(fullLessonWords.map(word => mode === "jpToZh" ? word.zh : word.jp));
-        options.slice(0
- options.forEach(opt => {
+        options.forEach(opt => {
           const btn = document.createElement("button");
           btn.textContent = opt;
           btn.className = "option-button";
@@ -265,6 +279,7 @@
         optionsDiv.appendChild(submitBtn);
         input.focus();
       }
+    }
 
     function checkAnswer(answer) {
       const correct = mode === "jpToZh" ? currentWord.zh : currentWord.jp;
@@ -276,13 +291,13 @@
         document.getElementById("result").textContent = "✅ 正確！";
         score += 10;
       } else {
-        document.getElementById("result").textContent = ❌ 錯了！正確答案是「${correct}」;
+        document.getElementById("result").textContent = `❌ 錯了！正確答案是「${correct}」`;
       }
 
       document.getElementById("score").textContent = score;
       document.getElementById("correct").textContent = correctCount;
       document.getElementById("total").textContent = totalCount;
-      document.getElementById("accuracy").textContent = ${Math.round((correctCount / totalCount) * 100)}%;
+      document.getElementById("accuracy").textContent = `${Math.round((correctCount / totalCount) * 100)}%`;
 
       if (score > highscore) {
         highscore = score;
@@ -341,12 +356,6 @@
       document.getElementById("highscore").textContent = highscore;
     };
   </script>
-<div style="margin-top: 30px;">
-  <a href="index.html">
-    <button>🔙 回首頁</button>
-  </a>
-</div>
-
 </body>
 </html>
 
