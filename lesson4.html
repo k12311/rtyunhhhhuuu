@@ -165,7 +165,7 @@
         { jp: "卵", zh: "蛋" }
       ]
     };
-      let lockedWords = [], currentWord = {}, score = 0, correctCount = 0, totalCount = 0;
+   let lockedWords = [], currentWord = {}, score = 0, correctCount = 0, totalCount = 0;
     let highscore = localStorage.getItem("highscore") || 0;
     let mode = "jpToZh";
     let quizType = "choice";
@@ -356,9 +356,14 @@
       document.getElementById("highscore").textContent = highscore;
     };
   </script>
+<div style="margin-top: 30px;">
+  <a href="index.html">
+    <button>🔙 回首頁</button>
+  </a>
+</div>
+
 </body>
 </html>
-
 
 
 
