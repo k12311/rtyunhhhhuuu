@@ -1,1 +1,490 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>第10課～第12課 自選單字練習</title>
+  <style>
+    body {
+      font-family: "Helvetica Neue", sans-serif;
+      background-color: #ffe4f0;
+      color: #333;
+      padding: 20px;
+      text-align: center;
+    }
+    .lesson {
+      background: #fff0f5;
+      padding: 10px;
+      margin: 20px auto;
+      width: fit-content;
+      border-radius: 12px;
+      text-align: left;
+    }
+    .lesson h3 {
+      margin-top: 0;
+    }
+    .option-button {
+      background-color: #fff;
+      margin: 5px;
+      padding: 10px 20px;
+      border: 2px solid #ff99cc;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button {
+      padding: 10px 16px;
+      margin: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      background-color: #ffccdd;
+      cursor: pointer;
+    }
+    #result {
+      margin-top: 10px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    #question {
+      font-size: 22px;
+      margin: 20px 0;
+    }
+    #quizArea {
+      margin-top: 30px;
+      padding: 20px;
+      background: #fffafc;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>第7～9課 自選單字練習</h1>
+
+  <div>
+    題目方向：
+    <select id="modeSelect" onchange="changeMode()">
+      <option value="jpToZh">日文 ➡ 中文（預設）</option>
+      <option value="zhToJp">中文 ➡ 日文</option>
+    </select>
+  </div>
+
+  <div>
+    題型選擇：
+    <select id="typeSelect" onchange="changeType()">
+      <option value="choice">選擇題（預設）</option>
+      <option value="input">打字題</option>
+    </select>
+  </div>
+
+  <div>
+    選擇課次：
+    <select id="lessonSelect" onchange="updateWordList()">
+      <option value="">-- 請選擇課次 --</option>
+      <option value="第10課">第10課</option>
+      <option value="第11課">第11課</option>
+      <option value="第12課">第12課</option>
+    </select>
+  </div>
+
+  <div id="wordSelection"></div>
+
+  <button onclick="startQuiz()">▶️ 開始測驗</button>
+  <button onclick="unlockSelection()">🔁 重新選單字</button>
+
+  <div id="quizArea">
+    <div id="question">← 點上方按鈕開始練習</div>
+    <div id="options"></div>
+    <div id="result"></div>
+    <div>
+      分數：<span id="score">0</span><br>
+      最高分：<span id="highscore">0</span><br>
+      答對率：<span id="accuracy">0%</span>（<span id="correct">0</span> / <span id="total">0</span> 題）
+    </div>
+    <button onclick="speakWord()">🔊 朗讀日文</button>
+    <button onclick="resetScore()">🔁 重置分數</button>
+  </div>
+
+  <div id="endScreen" style="display: none; margin-top: 20px; text-align: center;">
+    <h3>🎉 測驗完成！</h3>
+    <p>你的總得分是：<span id="finalScore">0</span> 分</p>
+    <button onclick="goHome()">🔙 回首頁</button>
+  </div>
+
+  <script src="lesson4to6-data.js"></script>
+  <script src="lesson4to6-logic.js"></script>
+</body>
+</html>
+
+
+  <script>
+    const allLessons = {
+  "第10課": [
+  { jp: "あります", zh: "有（東西）" },
+  { jp: "います", zh: "有（人、動物）" },
+  { jp: "いろいろ［な］", zh: "各式各樣的" },
+  { jp: "男の人（おとこのひと）", zh: "男人" },
+  { jp: "女の人（おんなのひと）", zh: "女人" },
+  { jp: "男の子（おとこのこ）", zh: "男孩" },
+  { jp: "女の子（おんなのこ）", zh: "女孩" },
+  { jp: "犬（いぬ）", zh: "狗" },
+  { jp: "猫（ねこ）", zh: "貓" },
+  { jp: "木（き）", zh: "樹" },
+  { jp: "物（もの）", zh: "東西、物品" },
+  { jp: "電池（でんち）", zh: "電池" },
+  { jp: "箱（はこ）", zh: "箱子" },
+  { jp: "スイッチ", zh: "開關" },
+  { jp: "冷蔵庫（れいぞうこ）", zh: "冰箱" },
+  { jp: "テーブル", zh: "餐桌、桌子" },
+  { jp: "ベッド", zh: "床" },
+  { jp: "棚（たな）", zh: "架子" },
+  { jp: "ドア", zh: "門" },
+  { jp: "窓（まど）", zh: "窗戶" },
+  { jp: "ポスト", zh: "郵筒、信箱" },
+  { jp: "ビル", zh: "大樓、大廈" },
+  { jp: "公園（こうえん）", zh: "公園" },
+  { jp: "喫茶店（きっさてん）", zh: "咖啡館" },
+  { jp: "本屋（ほんや）", zh: "書店" },
+  { jp: "～や", zh: "～店" },
+  { jp: "乗り場（のりば）", zh: "乘車處" },
+  { jp: "県（けん）", zh: "縣" },
+  { jp: "上（うえ）", zh: "上面" },
+  { jp: "下（した）", zh: "下面" },
+  { jp: "前（まえ）", zh: "前面" },
+  { jp: "後ろ（うしろ）", zh: "後面" },
+  { jp: "右（みぎ）", zh: "右邊" },
+  { jp: "左（ひだり）", zh: "左邊" },
+  { jp: "中（なか）", zh: "裡面、中間" },
+  { jp: "外（そと）", zh: "外面" },
+  { jp: "隣（となり）", zh: "隔壁" },
+  { jp: "近く（ちかく）", zh: "附近" },
+  { jp: "間（あいだ）", zh: "中間、之間" },
+  { jp: "～や～［など］", zh: "～和～等等" },
+  { jp: "一番～（いちばん）", zh: "最～" },
+  { jp: "段目（だんめ）", zh: "第～層（書架等）" },
+  { jp: "奥（おく）", zh: "最裡面、深處" },
+  { jp: "東京ディズニーランド", zh: "東京迪士尼樂園" },
+  { jp: "ＵＦＯ", zh: "幽浮、不明飛行物" },
+  { jp: "ナンプラー", zh: "魚露（泰國調味料）" },
+  { jp: "コーナー", zh: "專區、區域" },
+  { jp: "いちばん 下", zh: "最下面" }
+    ],
+   "第11課": [
+  { jp: "います", zh: "有（人、動物）" },
+  { jp: "かかります", zh: "花費（時間、金錢）" },
+  { jp: "休みます", zh: "請假、休息" },
+  { jp: "一つ（ひとつ）", zh: "一個" },
+  { jp: "二つ（ふたつ）", zh: "兩個" },
+  { jp: "三つ（みっつ）", zh: "三個" },
+  { jp: "四つ（よっつ）", zh: "四個" },
+  { jp: "五つ（いつつ）", zh: "五個" },
+  { jp: "六つ（むっつ）", zh: "六個" },
+  { jp: "七つ（ななつ）", zh: "七個" },
+  { jp: "八つ（やっつ）", zh: "八個" },
+  { jp: "九つ（ここのつ）", zh: "九個" },
+  { jp: "十（とお）", zh: "十個" },
+  { jp: "いくつ", zh: "幾個" },
+  { jp: "一人（ひとり）", zh: "一人" },
+  { jp: "二人（ふたり）", zh: "兩人" },
+  { jp: "～人（にん）", zh: "～人" },
+  { jp: "～台（だい）", zh: "～台（機器、車輛）" },
+  { jp: "～枚（まい）", zh: "～張（紙、票等薄物）" },
+  { jp: "～回（かい）", zh: "～次" },
+  { jp: "りんご", zh: "蘋果" },
+  { jp: "みかん", zh: "橘子" },
+  { jp: "サンドイッチ", zh: "三明治" },
+  { jp: "カレー[ライス]", zh: "咖哩飯" },
+  { jp: "アイスクリーム", zh: "冰淇淋" },
+  { jp: "切手（きって）", zh: "郵票" },
+  { jp: "はがき", zh: "明信片" },
+  { jp: "封筒（ふうとう）", zh: "信封" },
+  { jp: "速達（そくたつ）", zh: "限時郵件" },
+  { jp: "書留（かきとめ）", zh: "掛號" },
+  { jp: "航空便（こうくうびん）", zh: "航空郵件" },
+  { jp: "船便（ふなびん）", zh: "海運" },
+  { jp: "両親（りょうしん）", zh: "雙親" },
+  { jp: "兄弟（きょうだい）", zh: "兄弟姊妹" },
+  { jp: "兄（あに）", zh: "哥哥（自己的）" },
+  { jp: "お兄さん（おにいさん）", zh: "哥哥（別人的）" },
+  { jp: "姉（あね）", zh: "姊姊（自己的）" },
+  { jp: "お姉さん（おねえさん）", zh: "姊姊（別人的）" },
+  { jp: "弟（おとうと）", zh: "弟弟（自己的）" },
+  { jp: "弟さん（おとうとさん）", zh: "弟弟（別人的）" },
+  { jp: "妹（いもうと）", zh: "妹妹（自己的）" },
+  { jp: "妹さん（いもうとさん）", zh: "妹妹（別人的）" },
+  { jp: "外国（がいこく）", zh: "外國" },
+  { jp: "～時間（じかん）", zh: "～小時" },
+  { jp: "～週間（しゅうかん）", zh: "～週" },
+  { jp: "～か月（かげつ）", zh: "～個月" },
+  { jp: "～年（ねん）", zh: "～年" },
+  { jp: "どのくらい", zh: "多少（時間）" },
+  { jp: "全部で（ぜんぶで）", zh: "總共" },
+  { jp: "みんな", zh: "大家、全部（人）" },
+  { jp: "だけ", zh: "只有～" },
+  { jp: "いらっしゃいませ", zh: "歡迎光臨" },
+  { jp: "いい[お]天気ですね。", zh: "真是好天氣啊。" },
+  { jp: "お出かけですか。（おでかけですか）", zh: "您要外出啊？" },
+  { jp: "ちょっと～まで。", zh: "我只是去～一下。" },
+  { jp: "行って いらっしゃい。", zh: "路上小心（對出門者說）" },
+  { jp: "行って まいります。", zh: "我出門了（自己說）" },
+  { jp: "それから", zh: "然後"  }
+ ],
+   "第12課": [
+  { jp: "かんたん［な］", zh: "簡單的" },
+  { jp: "ちかい", zh: "近的" },
+  { jp: "とおい", zh: "遠的" },
+  { jp: "はやい", zh: "快的（速度）" },
+  { jp: "おそい", zh: "慢的" },
+  { jp: "おおい［ひとが～］", zh: "多的（人多）" },
+  { jp: "すくない［ひとが～］", zh: "少的（人少）" },
+  { jp: "あたたかい", zh: "暖的、溫的（天氣、物品）" },
+  { jp: "すずしい", zh: "涼快的" },
+  { jp: "あまい", zh: "甜的" },
+  { jp: "からい", zh: "辣的" },
+  { jp: "おもい", zh: "重的" },
+  { jp: "かるい", zh: "輕的" },
+  { jp: "いい［コーヒーが～］", zh: "比較喜歡（咖啡）" },
+  { jp: "きせつ", zh: "季節" },
+  { jp: "はる", zh: "春天" },
+  { jp: "なつ", zh: "夏天" },
+  { jp: "あき", zh: "秋天" },
+  { jp: "ふゆ", zh: "冬天" },
+  { jp: "てんき", zh: "天氣" },
+  { jp: "あめ", zh: "雨" },
+  { jp: "ゆき", zh: "雪" },
+  { jp: "くもり", zh: "陰天" },
+  { jp: "ホテル", zh: "飯店" },
+  { jp: "くうこう", zh: "機場" },
+  { jp: "うみ", zh: "海" },
+  { jp: "せかい", zh: "世界" },
+  { jp: "パーティー", zh: "派對" },
+  { jp: "［お］まつり", zh: "祭典" },
+  { jp: "しけん", zh: "考試" },
+  { jp: "すきやき", zh: "壽喜燒" },
+  { jp: "さしみ", zh: "生魚片" },
+  { jp: "［お］すし", zh: "壽司" },
+  { jp: "てんぷら", zh: "天婦羅" },
+  { jp: "ぶたにく", zh: "豬肉" },
+  { jp: "とりにく", zh: "雞肉" },
+  { jp: "ぎゅうにく", zh: "牛肉" },
+  { jp: "レモン", zh: "檸檬" },
+  { jp: "いけばな", zh: "插花（藝術）" },
+  { jp: "もみじ", zh: "紅葉" },
+  { jp: "どちら", zh: "哪一個（兩者選一）" },
+  { jp: "どちらも", zh: "兩者都～" },
+  { jp: "いちばん", zh: "最～" },
+  { jp: "ずっと", zh: "～得多" },
+  { jp: "はじめて", zh: "第一次" },
+  { jp: "ただいま", zh: "我回來了（剛回家時說）" },
+  { jp: "おかえりなさい", zh: "你回來啦" },
+  { jp: "すごいですね", zh: "好厲害啊！" },
+  { jp: "でも", zh: "但是" },
+  { jp: "つかれました", zh: "我累了（完成式）" }
+]
+    };
+   let lockedWords = [], currentWord = {}, score = 0, correctCount = 0, totalCount = 0;
+    let highscore = localStorage.getItem("highscore") || 0;
+    let mode = "jpToZh";
+    let quizType = "choice";
+
+    function changeMode() {
+      mode = document.getElementById("modeSelect").value;
+    }
+
+    function changeType() {
+      quizType = document.getElementById("typeSelect").value;
+    }
+
+    function updateWordList() {
+      const selectedLesson = document.getElementById("lessonSelect").value;
+      const container = document.getElementById("wordSelection");
+      container.innerHTML = "";
+
+      if (!selectedLesson || !allLessons[selectedLesson]) return;
+
+      const wordList = allLessons[selectedLesson];
+      const div = document.createElement("div");
+      div.className = "lesson";
+      const idPrefix = selectedLesson.replace("第", "lesson").replace("課", "");
+
+      div.innerHTML = `<h3>${selectedLesson} <button onclick="uncheckAll('${idPrefix}')">全部取消</button></h3>`;
+
+      wordList.forEach((word, i) => {
+        const id = `${idPrefix}_word${i}`;
+        div.innerHTML += `<label><input type="checkbox" id="${id}" value="${word.jp}" checked> ${word.jp}（${word.zh}）</label><br>`;
+      });
+
+      container.appendChild(div);
+    }
+
+    function uncheckAll(prefix) {
+      const checkboxes = document.querySelectorAll(`input[id^="${prefix}_"]`);
+      checkboxes.forEach(cb => cb.checked = false);
+    }
+
+    function getSelectedWords() {
+      const lesson = document.getElementById("lessonSelect").value;
+      const prefix = lesson.replace("第", "lesson").replace("課", "");
+      return allLessons[lesson].filter((_, i) => {
+        const id = `${prefix}_word${i}`;
+        return document.getElementById(id).checked;
+      });
+    }
+
+    function startQuiz() {
+      const selected = getSelectedWords();
+      if (selected.length === 0) return alert("請至少選一個單字！");
+      lockedWords = selected;
+      document.getElementById("wordSelection").style.display = "none";
+      showNewQuestion();
+    }
+
+    function unlockSelection() {
+      document.getElementById("wordSelection").style.display = "block";
+      lockedWords = [];
+      document.getElementById("question").textContent = "← 點上方按鈕開始練習";
+      document.getElementById("options").innerHTML = "";
+      document.getElementById("result").textContent = "";
+    }
+
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function showNewQuestion() {
+      currentWord = lockedWords[Math.floor(Math.random() * lockedWords.length)];
+      const selectedLesson = document.getElementById("lessonSelect").value;
+      const fullLessonWords = allLessons[selectedLesson];
+      const questionText = mode === "jpToZh"
+        ? `「${currentWord.jp}」是什麼意思？`
+        : `「${currentWord.zh}」的日文是什麼？`;
+      document.getElementById("question").textContent = questionText;
+      document.getElementById("result").textContent = "";
+
+      const correctAnswer = mode === "jpToZh" ? currentWord.zh : currentWord.jp;
+      let optionsPool = fullLessonWords
+        .map(w => mode === "jpToZh" ? w.zh : w.jp)
+        .filter(opt => opt !== correctAnswer);
+      const options = shuffle([correctAnswer, ...shuffle(optionsPool).slice(0, 3)]);
+
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
+
+      if (quizType === "choice") {
+        options.forEach(opt => {
+          const btn = document.createElement("button");
+          btn.textContent = opt;
+          btn.className = "option-button";
+          btn.onclick = () => checkAnswer(opt);
+          optionsDiv.appendChild(btn);
+        });
+      } else {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.id = "inputAnswer";
+        input.style.fontSize = "18px";
+        input.style.padding = "5px";
+        optionsDiv.appendChild(input);
+
+        const submitBtn = document.createElement("button");
+        submitBtn.textContent = "送出";
+        submitBtn.className = "option-button";
+        submitBtn.onclick = () => {
+          const userInput = document.getElementById("inputAnswer").value.trim();
+          checkAnswer(userInput);
+        };
+        optionsDiv.appendChild(submitBtn);
+        input.focus();
+      }
+    }
+
+    function checkAnswer(answer) {
+      const correct = mode === "jpToZh" ? currentWord.zh : currentWord.jp;
+      totalCount++;
+      const isCorrect = answer.trim().toLowerCase() === correct.trim().toLowerCase();
+
+      if (isCorrect) {
+        correctCount++;
+        document.getElementById("result").textContent = "✅ 正確！";
+        score += 10;
+      } else {
+        document.getElementById("result").textContent = `❌ 錯了！正確答案是「${correct}」`;
+      }
+
+      document.getElementById("score").textContent = score;
+      document.getElementById("correct").textContent = correctCount;
+      document.getElementById("total").textContent = totalCount;
+      document.getElementById("accuracy").textContent = `${Math.round((correctCount / totalCount) * 100)}%`;
+
+      if (score > highscore) {
+        highscore = score;
+        localStorage.setItem("highscore", highscore);
+        document.getElementById("highscore").textContent = highscore;
+      }
+
+      lockedWords = lockedWords.filter(word => word !== currentWord);
+
+      if (lockedWords.length === 0) {
+        document.getElementById("quizArea").style.display = "none";
+        document.getElementById("endScreen").style.display = "block";
+        document.getElementById("finalScore").textContent = score;
+      } else {
+        setTimeout(() => showNewQuestion(), 800);
+      }
+    }
+
+    function resetScore() {
+      score = 0;
+      correctCount = 0;
+      totalCount = 0;
+      document.getElementById("score").textContent = score;
+      document.getElementById("correct").textContent = 0;
+      document.getElementById("total").textContent = 0;
+      document.getElementById("accuracy").textContent = "0%";
+      document.getElementById("result").textContent = "";
+    }
+
+    function speakWord() {
+      const speakText = currentWord.jp || "";
+      if (!speakText) return;
+
+      speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(speakText);
+      utterance.lang = 'ja-JP';
+
+      const voices = speechSynthesis.getVoices();
+      const jpVoice = voices.find(voice => voice.lang === 'ja-JP');
+      if (jpVoice) utterance.voice = jpVoice;
+      speechSynthesis.speak(utterance);
+    }
+
+    function goHome() {
+      document.getElementById("endScreen").style.display = "none";
+      document.getElementById("quizArea").style.display = "block";
+      document.getElementById("wordSelection").style.display = "block";
+      document.getElementById("question").textContent = "← 點上方按鈕開始練習";
+      document.getElementById("options").innerHTML = "";
+      document.getElementById("result").textContent = "";
+      score = 0;
+      document.getElementById("score").textContent = score;
+    }
+
+    window.onload = () => {
+      document.getElementById("highscore").textContent = highscore;
+    };
+  </script>
+<div style="margin-top: 30px;">
+  <a href="index.html">
+    <button>🔙 回首頁</button>
+  </a>
+</div>
+
+</body>
+</html>
+
+
+
+
+
+
+
 
