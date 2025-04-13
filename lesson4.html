@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>第4課～第6課 自選單字練習</title>
+  <title>第4～6課 自選單字練習</title>
   <style>
     body {
       font-family: "Helvetica Neue", sans-serif;
@@ -62,7 +62,7 @@
 
   <div>
     題目方向：
-    <select id="modeSelect" onchange="changeMode()">
+    <select id="modeSelect">
       <option value="jpToZh">日文 ➡ 中文（預設）</option>
       <option value="zhToJp">中文 ➡ 日文</option>
     </select>
@@ -70,7 +70,7 @@
 
   <div>
     題型選擇：
-    <select id="typeSelect" onchange="changeType()">
+    <select id="typeSelect">
       <option value="choice">選擇題（預設）</option>
       <option value="input">打字題</option>
     </select>
@@ -78,7 +78,7 @@
 
   <div>
     選擇課次：
-    <select id="lessonSelect" onchange="updateWordList()">
+    <select id="lessonSelect">
       <option value="">-- 請選擇課次 --</option>
       <option value="第4課">第4課</option>
       <option value="第5課">第5課</option>
@@ -87,7 +87,6 @@
   </div>
 
   <div id="wordSelection"></div>
-
   <button onclick="startQuiz()">▶️ 開始測驗</button>
   <button onclick="unlockSelection()">🔁 重新選單字</button>
 
@@ -110,11 +109,16 @@
     <button onclick="goHome()">🔙 回首頁</button>
   </div>
 
-  <script src="lesson4to6-data.js"></script>
-  <script src="lesson4to6-logic.js"></script>
-</body>
-</html>
+  <div style="margin-top: 20px;">
+    <button onclick="showHistory()">📜 看歷史紀錄</button>
+  </div>
 
+  <div id="historyArea" style="display:none; margin-top: 20px; padding: 10px; background: #fff; border: 2px dashed #ff99cc; border-radius: 12px;">
+    <h3>📚 歷史紀錄</h3>
+    <div id="historyList"></div>
+    <button onclick="clearHistory()">🗑 清除紀錄</button>
+    <button onclick="hideHistory()">❌ 關閉</button>
+  </div>
 
   <script>
     const allLessons = {
