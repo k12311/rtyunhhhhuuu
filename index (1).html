@@ -155,59 +155,50 @@
   ]
 };
 
-    let lockedWords = [], currentWord = {}, score = 0, correctCount = 0, totalCount = 0;
+     let lockedWords = [], currentWord = {}, score = 0, correctCount = 0, totalCount = 0;
     let highscore = localStorage.getItem("highscore") || 0;
     let mode = "jpToZh";
     let quizType = "choice";
+    let wrongAnswers = [];
 
-    function changeMode() {
-      mode = document.getElementById("modeSelect").value;
-    }
+    document.getElementById("highscore").textContent = highscore;
 
-    function changeType() {
-      quizType = document.getElementById("typeSelect").value;
-    }
+    document.getElementById("modeSelect").onchange = () => mode = modeSelect.value;
+    document.getElementById("typeSelect").onchange = () => quizType = typeSelect.value;
+    document.getElementById("lessonSelect").onchange = updateWordList;
 
     function updateWordList() {
-      const selectedLesson = document.getElementById("lessonSelect").value;
+      const lesson = lessonSelect.value;
       const container = document.getElementById("wordSelection");
       container.innerHTML = "";
-
-      if (!selectedLesson || !allLessons[selectedLesson]) return;
-
-      const wordList = allLessons[selectedLesson];
+      if (!lesson || !allLessons[lesson]) return;
+      const list = allLessons[lesson];
       const div = document.createElement("div");
       div.className = "lesson";
-      const idPrefix = selectedLesson.replace("第", "lesson").replace("課", "");
-
-      div.innerHTML = `<h3>${selectedLesson} <button onclick="uncheckAll('${idPrefix}')">全部取消</button></h3>`;
-
-      wordList.forEach((word, i) => {
+      const idPrefix = lesson.replace("第", "lesson").replace("課", "");
+      div.innerHTML = `<h3>${lesson} <button onclick="uncheckAll('${idPrefix}')">全部取消</button></h3>`;
+      list.forEach((word, i) => {
         const id = `${idPrefix}_word${i}`;
         div.innerHTML += `<label><input type="checkbox" id="${id}" value="${word.jp}" checked> ${word.jp}（${word.zh}）</label><br>`;
       });
-
       container.appendChild(div);
     }
 
     function uncheckAll(prefix) {
-      const checkboxes = document.querySelectorAll(`input[id^="${prefix}_"]`);
-      checkboxes.forEach(cb => cb.checked = false);
+      document.querySelectorAll(`input[id^='${prefix}_']`).forEach(cb => cb.checked = false);
     }
 
     function getSelectedWords() {
-      const lesson = document.getElementById("lessonSelect").value;
+      const lesson = lessonSelect.value;
       const prefix = lesson.replace("第", "lesson").replace("課", "");
-      return allLessons[lesson].filter((_, i) => {
-        const id = `${prefix}_word${i}`;
-        return document.getElementById(id).checked;
-      });
+      return allLessons[lesson].filter((_, i) => document.getElementById(`${prefix}_word${i}`).checked);
     }
 
     function startQuiz() {
       const selected = getSelectedWords();
       if (selected.length === 0) return alert("請至少選一個單字！");
-      lockedWords = selected;
+      lockedWords = [...selected];
+      wrongAnswers = [];
       document.getElementById("wordSelection").style.display = "none";
       showNewQuestion();
     }
@@ -226,28 +217,23 @@
 
     function showNewQuestion() {
       currentWord = lockedWords[Math.floor(Math.random() * lockedWords.length)];
-      const selectedLesson = document.getElementById("lessonSelect").value;
-      const fullLessonWords = allLessons[selectedLesson];
-      const questionText = mode === "jpToZh"
-        ? `「${currentWord.jp}」是什麼意思？`
-        : `「${currentWord.zh}」的日文是什麼？`;
-      document.getElementById("question").textContent = questionText;
+      const lesson = lessonSelect.value;
+      const fullWords = allLessons[lesson];
+      const correct = mode === "jpToZh" ? currentWord.zh : currentWord.jp;
+      const qText = mode === "jpToZh" ? `「${currentWord.jp}」是什麼意思？` : `「${currentWord.zh}」的日文是什麼？`;
+      document.getElementById("question").textContent = qText;
       document.getElementById("result").textContent = "";
 
-      const correctAnswer = mode === "jpToZh" ? currentWord.zh : currentWord.jp;
-      let optionsPool = fullLessonWords
-        .map(w => mode === "jpToZh" ? w.zh : w.jp)
-        .filter(opt => opt !== correctAnswer);
-      const options = shuffle([correctAnswer, ...shuffle(optionsPool).slice(0, 3)]);
-
+      const pool = fullWords.map(w => mode === "jpToZh" ? w.zh : w.jp).filter(opt => opt !== correct);
+      const options = shuffle([correct, ...shuffle(pool).slice(0, 3)]);
       const optionsDiv = document.getElementById("options");
       optionsDiv.innerHTML = "";
 
       if (quizType === "choice") {
         options.forEach(opt => {
           const btn = document.createElement("button");
-          btn.textContent = opt;
           btn.className = "option-button";
+          btn.textContent = opt;
           btn.onclick = () => checkAnswer(opt);
           optionsDiv.appendChild(btn);
         });
@@ -257,15 +243,11 @@
         input.id = "inputAnswer";
         input.style.fontSize = "18px";
         input.style.padding = "5px";
-        optionsDiv.appendChild(input);
-
         const submitBtn = document.createElement("button");
         submitBtn.textContent = "送出";
         submitBtn.className = "option-button";
-        submitBtn.onclick = () => {
-          const userInput = document.getElementById("inputAnswer").value.trim();
-          checkAnswer(userInput);
-        };
+        submitBtn.onclick = () => checkAnswer(input.value.trim());
+        optionsDiv.appendChild(input);
         optionsDiv.appendChild(submitBtn);
         input.focus();
       }
@@ -274,61 +256,67 @@
     function checkAnswer(answer) {
       const correct = mode === "jpToZh" ? currentWord.zh : currentWord.jp;
       totalCount++;
-      const isCorrect = answer.trim().toLowerCase() === correct.trim().toLowerCase();
-
+      const isCorrect = answer.toLowerCase() === correct.toLowerCase();
       if (isCorrect) {
         correctCount++;
         document.getElementById("result").textContent = "✅ 正確！";
         score += 10;
       } else {
         document.getElementById("result").textContent = `❌ 錯了！正確答案是「${correct}」`;
+        wrongAnswers.push(currentWord);
       }
+      updateStats();
+      lockedWords = lockedWords.filter(w => w !== currentWord);
+      if (lockedWords.length === 0) {
+        document.getElementById("quizArea").style.display = "none";
+        document.getElementById("endScreen").style.display = "block";
+        document.getElementById("finalScore").textContent = score;
+        saveHistoryRecord();
+        if (wrongAnswers.length > 0) {
+          const retryBtn = document.createElement("button");
+          retryBtn.textContent = "🔁 再練錯的題目";
+          retryBtn.onclick = () => {
+            lockedWords = [...wrongAnswers];
+            wrongAnswers = [];
+            document.getElementById("quizArea").style.display = "block";
+            document.getElementById("endScreen").style.display = "none";
+            showNewQuestion();
+          };
+          document.getElementById("endScreen").appendChild(retryBtn);
+        }
+      } else {
+        setTimeout(showNewQuestion, 800);
+      }
+    }
 
+    function updateStats() {
       document.getElementById("score").textContent = score;
       document.getElementById("correct").textContent = correctCount;
       document.getElementById("total").textContent = totalCount;
       document.getElementById("accuracy").textContent = `${Math.round((correctCount / totalCount) * 100)}%`;
-
       if (score > highscore) {
         highscore = score;
         localStorage.setItem("highscore", highscore);
         document.getElementById("highscore").textContent = highscore;
       }
-
-      lockedWords = lockedWords.filter(word => word !== currentWord);
-
-      if (lockedWords.length === 0) {
-        document.getElementById("quizArea").style.display = "none";
-        document.getElementById("endScreen").style.display = "block";
-        document.getElementById("finalScore").textContent = score;
-      } else {
-        setTimeout(() => showNewQuestion(), 800);
-      }
     }
 
     function resetScore() {
-      score = 0;
-      correctCount = 0;
-      totalCount = 0;
-      document.getElementById("score").textContent = score;
-      document.getElementById("correct").textContent = 0;
-      document.getElementById("total").textContent = 0;
-      document.getElementById("accuracy").textContent = "0%";
+      score = 0; correctCount = 0; totalCount = 0;
+      updateStats();
       document.getElementById("result").textContent = "";
     }
 
     function speakWord() {
       const speakText = currentWord.jp || "";
       if (!speakText) return;
-
       speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(speakText);
-      utterance.lang = 'ja-JP';
-
+      const utter = new SpeechSynthesisUtterance(speakText);
+      utter.lang = 'ja-JP';
       const voices = speechSynthesis.getVoices();
-      const jpVoice = voices.find(voice => voice.lang === 'ja-JP');
-      if (jpVoice) utterance.voice = jpVoice;
-      speechSynthesis.speak(utterance);
+      const jpVoice = voices.find(v => v.lang === 'ja-JP');
+      if (jpVoice) utter.voice = jpVoice;
+      speechSynthesis.speak(utter);
     }
 
     function goHome() {
@@ -342,15 +330,50 @@
       document.getElementById("score").textContent = score;
     }
 
-    window.onload = () => {
-      document.getElementById("highscore").textContent = highscore;
-    };
-  </script>
-<div style="margin-top: 30px;">
-  <a href="index.html">
-    <button>🔙 回首頁</button>
-  </a>
-</div>
+    function saveHistoryRecord() {
+      const now = new Date();
+      const record = {
+        time: now.toLocaleString(),
+        total: totalCount,
+        correct: correctCount,
+        accuracy: Math.round((correctCount / totalCount) * 100)
+      };
+      const history = JSON.parse(localStorage.getItem("quizHistory") || "[]");
+      history.unshift(record);
+      localStorage.setItem("quizHistory", JSON.stringify(history));
+    }
 
+    function showHistory() {
+      const history = JSON.parse(localStorage.getItem("quizHistory") || "[]");
+      const listDiv = document.getElementById("historyList");
+      listDiv.innerHTML = history.length === 0 ? "目前沒有紀錄。" : "";
+      history.forEach((record, i) => {
+        const div = document.createElement("div");
+        div.innerHTML = `${i + 1}. 🕒 ${record.time}｜📋 題數：${record.total}｜✅ 答對：${record.correct}｜🎯 正確率：${record.accuracy}%`;
+        div.style.marginBottom = "8px";
+        listDiv.appendChild(div);
+      });
+      document.getElementById("historyArea").style.display = "block";
+    }
+
+    function hideHistory() {
+      document.getElementById("historyArea").style.display = "none";
+    }
+
+    function clearHistory() {
+      if (confirm("確定要清除所有歷史紀錄嗎？")) {
+        localStorage.removeItem("quizHistory");
+        document.getElementById("historyList").innerHTML = "已清除所有紀錄。";
+      }
+    }
+  </script>
+
+  <div style="margin-top: 30px;">
+    <a href="index.html">
+      <button>🔙 回首頁</button>
+    </a>
+  </div>
 </body>
 </html>
+
+
