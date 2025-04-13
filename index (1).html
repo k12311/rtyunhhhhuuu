@@ -86,34 +86,22 @@
     </select>
   </div>
 
-  <div id="wordSelection"></div>
-
-  <button onclick="startQuiz()">▶️ 開始測驗</button>
-  <button onclick="unlockSelection()">🔁 重新選單字</button>
-
-  <div id="quizArea">
-    <div id="question">← 點上方按鈕開始練習</div>
-    <div id="options"></div>
-    <div id="result"></div>
-    <div>
-      分數：<span id="score">0</span><br>
-      最高分：<span id="highscore">0</span><br>
-      答對率：<span id="accuracy">0%</span>（<span id="correct">0</span> / <span id="total">0</span> 題）
-    </div>
-    <button onclick="speakWord()">🔊 朗讀日文</button>
-    <button onclick="resetScore()">🔁 重置分數</button>
-  </div>
-
-  <div id="endScreen" style="display: none; margin-top: 20px; text-align: center;">
+   <div id="endScreen" style="display: none; margin-top: 20px; text-align: center;">
     <h3>🎉 測驗完成！</h3>
     <p>你的總得分是：<span id="finalScore">0</span> 分</p>
     <button onclick="goHome()">🔙 回首頁</button>
   </div>
 
-  <script src="lesson4to6-data.js"></script>
-  <script src="lesson4to6-logic.js"></script>
-</body>
-</html>
+  <div style="margin-top: 20px;">
+    <button onclick="showHistory()">📜 看歷史紀錄</button>
+  </div>
+
+  <div id="historyArea" style="display:none; margin-top: 20px; padding: 10px; background: #fff; border: 2px dashed #ff99cc; border-radius: 12px;">
+    <h3>📚 歷史紀錄</h3>
+    <div id="historyList"></div>
+    <button onclick="clearHistory()">🗑 清除紀錄</button>
+    <button onclick="hideHistory()">❌ 關閉</button>
+  </div>
 
 
   <script>
