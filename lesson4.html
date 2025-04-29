@@ -112,6 +112,9 @@
   <div style="margin-top: 20px;">
     <button onclick="showHistory()">📜 看歷史紀錄</button>
   </div>
+<div style="margin-top: 20px;">
+  <button onclick="showWrongCollection()">📚 錯題收藏夾</button>
+</div>
 
   <div id="historyArea" style="display:none; margin-top: 20px; padding: 10px; background: #fff; border: 2px dashed #ff99cc; border-radius: 12px;">
     <h3>📚 歷史紀錄</h3>
@@ -119,6 +122,13 @@
     <button onclick="clearHistory()">🗑 清除紀錄</button>
     <button onclick="hideHistory()">❌ 關閉</button>
   </div>
+
+<div id="wrongCollectionArea" style="display:none; margin-top:20px; padding:10px; background:#fff; border:2px dashed #ff99cc; border-radius:12px;">
+  <h3>📚 錯題收藏夾</h3>
+  <div id="wrongCollectionList"></div>
+  <button onclick="clearWrongCollection()">🗑 清空收藏夾</button>
+  <button onclick="hideWrongCollection()">❌ 關閉</button>
+</div>
 
   <script>
     const allLessons = {
@@ -156,62 +166,56 @@
         { jp: "どういたしまして", zh: "不客氣" }
       ],
      "第6課": [
-{ jp: "食べます", zh: "吃" },
-{ jp: "飲みます", zh: "喝" },
-{ jp: "吸います", zh: "吸（香菸等）" },
-{ jp: "見ます", zh: "看" },
-{ jp: "聞きます", zh: "聽" },
-{ jp: "読みます", zh: "讀" },
-{ jp: "書きます", zh: "寫" },
-{ jp: "買います", zh: "買" },
-{ jp: "取ります", zh: "拿" },
-{ jp: "売ります", zh: "賣" },
-{ jp: "撮ります", zh: "拍（照）" },
-{ jp: "します", zh: "做" },
-{ jp: "会います", zh: "見面" },
-{ jp: "電話します", zh: "打電話" },
-{ jp: "歩きます", zh: "走路" },
-{ jp: "遊びます", zh: "玩" },
-{ jp: "泳ぎます", zh: "游泳" },
-{ jp: "寝ます", zh: "睡覺" },
-{ jp: "起きます", zh: "起床" },
-{ jp: "ご飯", zh: "飯" },
-{ jp: "パン", zh: "麵包" },
-{ jp: "卵", zh: "蛋" },
-{ jp: "肉", zh: "肉" },
-{ jp: "魚", zh: "魚" },
-{ jp: "野菜", zh: "蔬菜" },
-{ jp: "果物", zh: "水果" },
-{ jp: "水", zh: "水" },
-{ jp: "お茶", zh: "茶" },
-{ jp: "紅茶", zh: "紅茶" },
-{ jp: "牛乳", zh: "牛奶" },
-{ jp: "ジュース", zh: "果汁" },
-{ jp: "ビール", zh: "啤酒" },
-{ jp: "コーヒー", zh: "咖啡" },
-{ jp: "たばこ", zh: "香菸" },
-{ jp: "てがみ", zh: "信" },
-{ jp: "レポート", zh: "報告" },
-{ jp: "しゃしん", zh: "照片" },
-{ jp: "ビデオ", zh: "影片、錄影帶" },
-{ jp: "映画", zh: "電影" },
-{ jp: "みせ", zh: "商店" },
-{ jp: "にわ", zh: "庭院、院子" },
-{ jp: "しゅくだい", zh: "作業" },
-{ jp: "テニス", zh: "網球" },
-{ jp: "サッカー", zh: "足球" },
-{ jp: "[お]はなみ", zh: "賞花" },
-{ jp: "なに", zh: "什麼" },
-{ jp: "いっしょに", zh: "一起" },
-{ jp: "ちょっと", zh: "一會兒、一點點" },
-{ jp: "いつも", zh: "總是" },
-{ jp: "ときどき", zh: "有時" },
-{ jp: "それから", zh: "然後" },
-{ jp: "ええ", zh: "是的" },
-{ jp: "いいですね。", zh: "好啊" },
-{ jp: "わかりました。", zh: "我明白了" },
-{ jp: "なんですか。", zh: "什麼事？" },
-{ jp: "じゃ、また[あした]。", zh: "那麼，明天再見。" }
+  { jp: "たべます", zh: "吃" },
+  { jp: "のみます", zh: "喝" },
+  { jp: "すいます", zh: "吸" },
+  { jp: "みます", zh: "看" },
+  { jp: "ききます", zh: "聽" },
+  { jp: "よみます", zh: "讀" },
+  { jp: "かきます", zh: "寫" },
+  { jp: "かいます", zh: "買" },
+  { jp: "とります", zh: "拍攝〔照片〕" },
+  { jp: "します", zh: "做" },
+  { jp: "あいます", zh: "〔跟朋友〕見面" },
+  { jp: "ごはん", zh: "白飯、飯" },
+  { jp: "あさごはん", zh: "早餐" },
+  { jp: "ひるごはん", zh: "午餐" },
+  { jp: "ばんごはん", zh: "晚餐" },
+  { jp: "パン", zh: "麵包" },
+  { jp: "たまご", zh: "蛋" },
+  { jp: "にく", zh: "肉" },
+  { jp: "さかな", zh: "魚" },
+  { jp: "やさい", zh: "蔬菜" },
+  { jp: "くだもの", zh: "水果" },
+  { jp: "みず", zh: "水" },
+  { jp: "おちゃ", zh: "茶" },
+  { jp: "こうちゃ", zh: "紅茶" },
+  { jp: "ぎゅうにゅう", zh: "牛奶" },
+  { jp: "ジュース", zh: "果汁" },
+  { jp: "ビール", zh: "啤酒" },
+  { jp: "[お]さけ", zh: "酒類、日本酒" },
+  { jp: "たばこ", zh: "香菸" },
+  { jp: "てがみ", zh: "信" },
+  { jp: "レポート", zh: "報告" },
+  { jp: "しゃしん", zh: "照片" },
+  { jp: "ビデオ", zh: "影片、錄影帶" },
+  { jp: "みせ", zh: "商店" },
+  { jp: "にわ", zh: "庭院、院子" },
+  { jp: "しゅくだい", zh: "作業" },
+  { jp: "テニス", zh: "網球" },
+  { jp: "サッカー", zh: "足球" },
+  { jp: "[お]はなみ", zh: "賞花" },
+  { jp: "なに", zh: "什麼" },
+  { jp: "いっしょに", zh: "一起" },
+  { jp: "ちょっと", zh: "一會兒、一點點" },
+  { jp: "いつも", zh: "總是" },
+  { jp: "ときどき", zh: "有時" },
+  { jp: "それから", zh: "然後" },
+  { jp: "ええ", zh: "是的" },
+  { jp: "いいですね。", zh: "好啊" },
+  { jp: "わかりました。", zh: "我明白了" },
+  { jp: "なんですか。", zh: "什麼事？" },
+  { jp: "じゃ、また[あした]。", zh: "那麼，〔明天〕再見。" }
 ]
     };
  let lockedWords = [], currentWord = {}, score = 0, correctCount = 0, totalCount = 0;
@@ -321,9 +325,11 @@
         document.getElementById("result").textContent = "✅ 正確！";
         score += 10;
       } else {
-        document.getElementById("result").textContent = `❌ 錯了！正確答案是「${correct}」`;
-        wrongAnswers.push(currentWord);
-      }
+  document.getElementById("result").textContent = `❌ 錯了！正確答案是「${correct}」`;
+  wrongAnswers.push(currentWord);
+  saveWrongCollection(currentWord); // 👈加這行
+}
+
       updateStats();
       lockedWords = lockedWords.filter(w => w !== currentWord);
       if (lockedWords.length === 0) {
@@ -425,6 +431,45 @@
         document.getElementById("historyList").innerHTML = "已清除所有紀錄。";
       }
     }
+function saveWrongCollection(word) {
+  const collection = JSON.parse(localStorage.getItem("wrongCollection") || "[]");
+  if (!collection.find(w => w.jp === word.jp && w.zh === word.zh)) {
+    collection.push(word);
+    localStorage.setItem("wrongCollection", JSON.stringify(collection));
+  }
+}
+
+function showWrongCollection() {
+  const collection = JSON.parse(localStorage.getItem("wrongCollection") || "[]");
+  const listDiv = document.getElementById("wrongCollectionList");
+  listDiv.innerHTML = collection.length === 0 ? "目前沒有收藏。" : "";
+  collection.forEach((word, i) => {
+    const div = document.createElement("div");
+    div.innerHTML = `${i + 1}. ${word.jp}（${word.zh}） <button onclick="deleteWrongWord(${i})">❌ 刪除</button>`;
+    div.style.marginBottom = "8px";
+    listDiv.appendChild(div);
+  });
+  document.getElementById("wrongCollectionArea").style.display = "block";
+}
+
+function hideWrongCollection() {
+  document.getElementById("wrongCollectionArea").style.display = "none";
+}
+
+function deleteWrongWord(index) {
+  const collection = JSON.parse(localStorage.getItem("wrongCollection") || "[]");
+  collection.splice(index, 1);
+  localStorage.setItem("wrongCollection", JSON.stringify(collection));
+  showWrongCollection();
+}
+
+function clearWrongCollection() {
+  if (confirm("確定要清空所有收藏的單字嗎？")) {
+    localStorage.removeItem("wrongCollection");
+    document.getElementById("wrongCollectionList").innerHTML = "已清空收藏夾。";
+  }
+}
+
   </script>
 
   <div style="margin-top: 30px;">
@@ -434,7 +479,6 @@
   </div>
 </body>
 </html>
-
 
 
 
